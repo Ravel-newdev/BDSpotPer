@@ -13,7 +13,7 @@ BEGIN
     )
     BEGIN
         RAISERROR (
-            '¡lbum barroco sÛ pode ter faixas com tipo de gravaÁ„o DDD.',
+            '√Ålbum barroco s√≥ pode ter faixas com tipo de grava√ß√£o DDD.',
             16, 1
         );
         ROLLBACK TRANSACTION;
@@ -33,7 +33,7 @@ BEGIN
     )
     BEGIN
         RAISERROR (
-            'Um ·lbum n„o pode ter mais que 64 faixas.',
+            'Um √°lbum n√£o pode ter mais que 64 faixas.',
             16, 1
         );
         ROLLBACK TRANSACTION;
@@ -53,7 +53,7 @@ BEGIN
     )
     BEGIN
         RAISERROR (
-            'Um ·lbum n„o pode ter mais que 64 faixas.',
+            'Um √°lbum n√£o pode ter mais que 64 faixas.',
             16, 1
         );
         ROLLBACK TRANSACTION;
@@ -83,21 +83,31 @@ BEGIN
     WHERE cod_album IN (SELECT cod_album FROM deleted);
 END;
 
-CREATE TRIGGER trg_preco_album
+CREATE OR ALTER TRIGGER trg_preco_album
 ON album
 AFTER INSERT, UPDATE
 AS
 BEGIN
     DECLARE @media DECIMAL(10,2);
 
+    -- M√©dia apenas de √°lbuns que t√™m SOMENTE faixas DDD
     SELECT @media = AVG(a.preco_compra)
     FROM album a
-    WHERE NOT EXISTS (
+    WHERE EXISTS (
+        SELECT 1
+        FROM faixa f
+        WHERE f.cod_album = a.cod_album
+    )
+    AND NOT EXISTS (
         SELECT 1
         FROM faixa f
         WHERE f.cod_album = a.cod_album
           AND f.tipo_gravacao <> 'DDD'
     );
+
+    -- Se ainda n√£o houver base suficiente, bloqueia valores absurdos
+    IF @media IS NULL
+        SET @media = 100;  -- valor de refer√™ncia inicial
 
     IF EXISTS (
         SELECT 1
@@ -106,7 +116,7 @@ BEGIN
     )
     BEGIN
         RAISERROR (
-            'PreÁo do ·lbum excede 3x a mÈdia dos ·lbuns DDD.',
+            'Pre√ßo do √°lbum excede 3x a m√©dia dos √°lbuns DDD.',
             16, 1
         );
         ROLLBACK TRANSACTION;
