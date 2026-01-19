@@ -1,11 +1,9 @@
 import pyodbc
-
-# 1. CONEXÃO
-# Tenta conectar. Se der erro, mostra mensagem e fecha.
+# Tenta conectar. Se der erro, mostra mensagem e fecha, mas da certo
 try:
     conn = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=localhost\SQLEXPRESS01;"
+        "SERVER=localhost\SQLEXPRESS01;" #lembrar de mudar quando trocar de maquina
         "DATABASE=BDSpotPer;"
         "Trusted_Connection=yes;"
     )
@@ -216,7 +214,7 @@ def consultas():
             for r in cursor.fetchall(): print(f"{r.nome} - {r.preco_compra}")
 
         elif op == "B" or op == "b":
-            # SQL grande, mas necessário
+            
             sql = "SELECT TOP 1 g.nome, COUNT(DISTINCT pf.id_playlist) FROM gravadora g JOIN album a ON a.cod_gravadora = g.cod_gravadora JOIN faixa f ON f.cod_album = a.cod_album JOIN faixa_compositor fc ON fc.id_faixa = f.id_faixa JOIN compositor c ON c.cod_compositor = fc.id_compositor JOIN playlist_faixa pf ON pf.id_faixa = f.id_faixa WHERE c.nome LIKE '%Dvorack%' GROUP BY g.nome ORDER BY 2 DESC"
             cursor.execute(sql)
             r = cursor.fetchone()
@@ -242,9 +240,7 @@ def consultas():
     except:
         print("Erro na consulta.")
 
-# ==========================================================
-# MENU
-# ==========================================================
+#menu
 while True:
 
     print("\n===========================")

@@ -18,8 +18,7 @@ ALTER TABLE playlist_faixa ADD CONSTRAINT fk_pf_faixa
  REFERENCES faixa(id_faixa);
 GO
 
--- O bloco do CHECK (Constraint) foi removido daqui porque ele dava erro.
--- A regra do "Barroco só aceita DDD" já está sendo feita pelo Trigger no outro arquivo.
+-- O bloco do CHECK (Constraint) foi removido daqui porque ele dava erro
 
 --Aumenta o tamanho da coluna para aceitar 'ADD' e 'DDD'
 ALTER TABLE faixa ALTER COLUMN tipo_gravacao VARCHAR(3);

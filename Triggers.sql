@@ -22,7 +22,7 @@ BEGIN
 END;
 GO 
 
--- 2. Trigger para limitar 64 faixas (Havia uma duplicata aqui, deixei apenas um)
+--Trigger para limitar 64 faixas (Havia uma duplicata aqui, deixei apenas um)
 CREATE TRIGGER trg_max_64_faixas
 ON faixa
 AFTER INSERT
@@ -44,7 +44,7 @@ BEGIN
 END;
 GO 
 
--- 3. Trigger para deletar em cascata (Delete álbum apaga faixas)
+--Trigger para deletar em cascata (Delete álbum apaga faixas)
 CREATE TRIGGER trg_album_delete
 ON album
 INSTEAD OF DELETE
