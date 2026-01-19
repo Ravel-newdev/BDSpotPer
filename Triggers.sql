@@ -1,3 +1,4 @@
+--Trigger para validar Álbum Barroco (só aceita DDD)
 CREATE TRIGGER trg_album_barroco_ddd
 ON faixa
 AFTER INSERT, UPDATE
@@ -7,7 +8,7 @@ BEGIN
         SELECT 1
         FROM inserted f
         JOIN album a ON a.cod_album = f.cod_album
-        JOIN periodo p ON p.cod_periodo = a.cod_periodo
+        JOIN periodo_musical p ON p.cod_periodo = a.cod_album -- Atenção: no seu original estava 'periodo', mas a tabela certa é 'periodo_musical' conforme seu create tables
         WHERE p.descricao = 'Barroco'
           AND f.tipo_gravacao <> 'DDD'
     )
@@ -19,7 +20,9 @@ BEGIN
         ROLLBACK TRANSACTION;
     END
 END;
+GO 
 
+-- 2. Trigger para limitar 64 faixas (Havia uma duplicata aqui, deixei apenas um)
 CREATE TRIGGER trg_max_64_faixas
 ON faixa
 AFTER INSERT
@@ -39,49 +42,43 @@ BEGIN
         ROLLBACK TRANSACTION;
     END
 END;
+GO 
 
-CREATE TRIGGER trg_max_64_faixas
-ON faixa
-AFTER INSERT
-AS
-BEGIN
-    IF EXISTS (
-        SELECT cod_album
-        FROM faixa
-        GROUP BY cod_album
-        HAVING COUNT(*) > 64
-    )
-    BEGIN
-        RAISERROR (
-            'Um álbum não pode ter mais que 64 faixas.',
-            16, 1
-        );
-        ROLLBACK TRANSACTION;
-    END
-END;
-
+-- 3. Trigger para deletar em cascata (Delete álbum apaga faixas)
 CREATE TRIGGER trg_album_delete
 ON album
 INSTEAD OF DELETE
 AS
 BEGIN
+    -- Apaga da tabela de ligação playlist_faixa
     DELETE pf
     FROM playlist_faixa pf
     JOIN faixa f ON f.id_faixa = pf.id_faixa
     JOIN deleted d ON d.cod_album = f.cod_album;
 
+    -- Apaga da tabela de ligação faixa_interprete
     DELETE fi
     FROM faixa_interprete fi
     JOIN faixa f ON f.id_faixa = fi.id_faixa
     JOIN deleted d ON d.cod_album = f.cod_album;
+    
+    -- Apaga da tabela de ligação faixa_compositor (faltou essa)
+    DELETE fc
+    FROM faixa_compositor fc
+    JOIN faixa f ON f.id_faixa = fc.id_faixa
+    JOIN deleted d ON d.cod_album = f.cod_album;
 
+    -- Apaga as faixas
     DELETE f
     FROM faixa f
     JOIN deleted d ON d.cod_album = f.cod_album;
 
+    -- Finalmente apaga o álbum
     DELETE FROM album
     WHERE cod_album IN (SELECT cod_album FROM deleted);
 END;
+GO 
+
 
 CREATE OR ALTER TRIGGER trg_preco_album
 ON album
@@ -90,7 +87,7 @@ AS
 BEGIN
     DECLARE @media DECIMAL(10,2);
 
-    -- Média apenas de álbuns que têm SOMENTE faixas DDD
+    -- Calcula a média
     SELECT @media = AVG(a.preco_compra)
     FROM album a
     WHERE EXISTS (
@@ -105,9 +102,8 @@ BEGIN
           AND f.tipo_gravacao <> 'DDD'
     );
 
-    -- Se ainda não houver base suficiente, bloqueia valores absurdos
     IF @media IS NULL
-        SET @media = 100;  -- valor de referência inicial
+        SET @media = 100;
 
     IF EXISTS (
         SELECT 1
@@ -122,3 +118,4 @@ BEGIN
         ROLLBACK TRANSACTION;
     END
 END;
+GO 
