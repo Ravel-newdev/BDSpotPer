@@ -29,7 +29,7 @@ BDSpotPer/
 
 ---
 
-## 🗄️ Modelo de Dados
+## Modelo de Dados
 
 O banco é composto pelas seguintes entidades principais:
 
