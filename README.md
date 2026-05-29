@@ -4,13 +4,13 @@ Um sistema de gerenciamento de playlists musicais inspirado no Spotify, desenvol
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 O **BDSpotPer** modela um acervo musical completo, permitindo cadastrar e gerenciar playlists, faixas, álbuns, compositores, intérpretes e gravadoras. O sistema oferece operações CRUD completas via terminal e consultas analíticas sobre o acervo.
 
 ---
 
-## 🗂️ Estrutura do Repositório
+## Estrutura do Repositório
 
 ```
 BDSpotPer/
